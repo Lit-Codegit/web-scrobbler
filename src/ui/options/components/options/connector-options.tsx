@@ -56,6 +56,16 @@ export default function ConnectorOptionsList() {
 					connector="YouTube"
 					key="scrobbleEntertainmentOnly"
 				/>
+				<ConnectorOptionEntry
+					options={options}
+					setOptions={setOptions}
+					connectorOptions={connectorOptions}
+					i18ntitle="optionYtSwapSepTitle"
+					i18nlabel="optionYtSwapSep"
+					connector="YouTube"
+					key="swapTitleSplit"
+				/>
+				
 				<li class={styles.muted}>{t('optionYtDesc')}</li>
 			</ul>
 		</>

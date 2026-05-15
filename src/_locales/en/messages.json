@@ -175,6 +175,14 @@
         "message": "Ignore videos that are not recognised by YouTube Music as music",
         "description": "Option title"
     },
+    "optionYtSwapSep": {
+        "message": "Swap artist and track for separator-based title splits",
+        "description": "Option label"
+    },
+    "optionYtSwapSepTitle": {
+        "message": "When enabled, parts before and after separators like / - ~ are swapped (track becomes first, artist second). Does not affect explicit patterns like \"by\" or \"covered by\".",
+        "description": "Option title"
+    },
     "optionTheme": {
         "message": "Theme",
         "description": "Option label"

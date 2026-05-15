@@ -175,6 +175,14 @@
         "message": "Ignore videos that are not recognised by YouTube Music as music",
         "description": "Option title"
     },
+    "optionYtSwapSep": {
+        "message": "交换分隔符（/ - ~ 等）的曲名和歌手提取顺序",
+        "description": "Option label"
+    },
+    "optionYtSwapSepTitle": {
+        "message": "启用后，分隔符前后的内容将以「曲名 - 歌手」的顺序提取（默认是「歌手 - 曲名」）。不会影响 \"by\"、\"covered by\" 等具有明确语义的模式。",
+        "description": "Option title"
+    },
     "optionTheme": {
         "message": "主题",
         "description": "Option label"

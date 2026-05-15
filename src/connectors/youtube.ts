@@ -62,9 +62,12 @@ let scrobbleMusicRecognisedOnly = false;
  * Wether the Youtube Music track info getter is enabled
  */
 let getTrackInfoFromYtMusicEnabled = false;
+let swapTitleSplit = false;
 
 let currentVideoDescription: string | null = null;
 let artistTrackFromDescription: TrackInfoWithAlbum | null = null;
+
+let metadataFound = false;
 
 const getTrackInfoFromYoutubeMusicCache: {
 	[videoId: string]: {
@@ -83,6 +86,7 @@ const trackInfoGetters: (() =>
 	| TrackInfoWithAlbum)[] = [
 	getTrackInfoFromChapters,
 	getTrackInfoFromYoutubeMusic,
+	getTrackInfoFromStructuredDescription,
 	getTrackInfoFromDescription,
 	getTrackInfoFromTitle,
 ];
@@ -381,8 +385,48 @@ async function readConnectorOptions() {
 		getTrackInfoFromYtMusicEnabled = true;
 		Util.debugLog('Get track info from YouTube Music enabled');
 	}
+
+	if (await Util.getOption('YouTube', 'swapTitleSplit')) {
+		swapTitleSplit = true;
+		Util.debugLog('Swap title split enabled');
+	}
 }
 
+	function getTrackInfoFromStructuredDescription():
+		| TrackInfoWithAlbum
+		| null {
+		metadataFound = false;
+
+		const ytInitialData = (window as any).ytInitialData;
+		if (!ytInitialData) return null;
+
+		const items: any[] =
+			ytInitialData?.engagementPanels?.find(
+				(p: any) =>
+					p?.engagementPanelSectionListRenderer
+						?.content?.structuredDescriptionContentRenderer,
+			)?.engagementPanelSectionListRenderer?.content
+				?.structuredDescriptionContentRenderer?.items;
+
+		if (!items) return null;
+
+		for (const item of items) {
+			const cards = item?.horizontalCardListRenderer?.cards;
+			if (!cards) continue;
+			for (const card of cards) {
+				const vm = card?.videoAttributeViewModel;
+				if (vm?.title) {
+					metadataFound = true;
+					return {
+						track: vm.title,
+						album: vm.secondarySubtitle?.content || null,
+					};
+				}
+			}
+		}
+
+		return null;
+	}
 function getVideoDescription() {
 	return Util.getTextFromSelectors(videoDescriptionSelector)?.trim() ?? null;
 }
@@ -505,7 +549,7 @@ function getTrackInfoFromChapters() {
 	}
 
 	const chapterName = Util.getTextFromSelectors(chapterNameSelector);
-	const artistTrack = Util.processYtVideoTitle(chapterName);
+	const artistTrack = Util.processYtVideoTitle(chapterName, swapTitleSplit);
 	if (!artistTrack.track) {
 		artistTrack.track = chapterName;
 	}
@@ -513,8 +557,10 @@ function getTrackInfoFromChapters() {
 }
 
 function getTrackInfoFromTitle(): ArtistTrackInfo {
+	const hasMetadata = metadataFound;
 	let { artist, track } = Util.processYtVideoTitle(
 		Util.getTextFromSelectors(videoTitleSelector),
+		swapTitleSplit && !hasMetadata,
 	);
 	if (!artist) {
 		artist = Util.getTextFromSelectors(channelNameSelector);

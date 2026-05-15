@@ -74,6 +74,7 @@ export const defaultSeparators = [
 	'|',
 	'///',
 	'/',
+	'／',
 	'~',
 ];
 
@@ -789,6 +790,21 @@ export const ytTitleRegExps = [
 		pattern: /(\w[\s\w]*?)\s+\([^)]*\s*by\s*([^)]+)+\)/,
 		groups: { artist: 2, track: 1 },
 	},
+	// Track / Orig - Cover (cover)
+	{
+		pattern: /(.+?)\s*[\/／]\s*.+\s*[\-–—]\s*(.+?)(?:\s*\(cover\))?$/i,
+		groups: { artist: 2, track: 1 },
+	},
+	// Track / ... by Artist
+	{
+		pattern: /(.+?)\s*[\/／\-]\s*.+\s+by\s+(.+)/i,
+		groups: { artist: 2, track: 1 },
+	},
+	// Track / covered by Artist
+	{
+		pattern: /(.+?)\s*cover(?:ed)?\s+by\s+(.+)/i,
+		groups: { artist: 2, track: 1 },
+	},
 ];
 
 /**
@@ -798,6 +814,7 @@ export const ytTitleRegExps = [
  */
 export function processYtVideoTitle(
 	videoTitle: string | null | undefined,
+	swap = false,
 ): ArtistTrackInfo {
 	let artist = null;
 	let track = null;
@@ -842,7 +859,7 @@ export function processYtVideoTitle(
 
 	// No match? Try splitting, then.
 	if (isArtistTrackEmpty({ artist, track })) {
-		({ artist, track } = splitArtistTrack(title));
+		({ artist, track } = splitArtistTrack(title, null, swap));
 	}
 
 	// No match? Check for 【】
